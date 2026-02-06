@@ -31,9 +31,13 @@ body {
 /* Content section */
 .content {
   display: flex;
-  justify-content: center;
+  flex-direction: column;  /* stack children vertically */
+  justify-content: center; /* center vertically if needed */
+  align-items: center;     /* center horizontally */
   padding: 40px;
+  text-align: center;      /* optional, nice for paragraphs */
 }
+
 
 .videos {
   display: flex;               /* align children horizontally */
