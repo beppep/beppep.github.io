@@ -7,7 +7,7 @@ body {
 
 /* Intro section */
 .hero {
-  min-height: 70vh;
+  min-height: 30vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -35,10 +35,17 @@ body {
   padding: 40px;
 }
 
-iframe {
-  width: 100%;
-  max-width: 900px;
+.videos {
+  display: flex;               /* align children horizontally */
+  justify-content: center;     /* center the row */
+  gap: 20px;                   /* space between videos */
+  flex-wrap: wrap;             /* allow wrapping on small screens */
+}
+
+.videos iframe {
+  flex: 1 1 400px;             /* flexible width, min 400px */
+  max-width: 500px;            /* optional cap */
   aspect-ratio: 16 / 9;
-  border-radius: 14px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
