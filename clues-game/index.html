@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Who's evil? (web)</title>
+  <style>
+    :root {
+      --bg: #f3f5f7;
+      --panel: #ffffff;
+      --ink: #1f2933;
+      --muted: #5c6b77;
+      --line: #d8e0e6;
+      --accent: #2b4c7e;
+      --good: #1b7f3a;
+      --evil: #b42318;
+      --cell: 150px;
+      --pad: 30px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(1000px 600px at 20% -10%, #e8f0f8 0%, var(--bg) 45%, #eef2f5 100%);
+      color: var(--ink);
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .app {
+      width: min(1000px, 96vw);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 12px 32px rgba(16, 24, 40, 0.12);
+      overflow: hidden;
+    }
+
+    .topbar {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .controls-main {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .controls-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    button, select {
+      border: 1px solid #b8c4ce;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    button:hover { background: #f8fbff; }
+
+    .guess-btn {
+      padding: 12px 22px;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      border: 2px solid #9b1c14;
+      background: #d93f2f;
+      color: #ffffff;
+      min-width: 140px;
+    }
+
+    .guess-btn:hover {
+      background: #c63224;
+    }
+
+    .lives {
+      font-weight: 700;
+      color: #9b1c14;
+      font-size: 15px;
+    }
+
+    .status {
+      width: 100%;
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .board-wrap {
+      padding: 16px;
+    }
+
+    .board {
+      position: relative;
+      margin: 0 auto;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: linear-gradient(180deg, #fcfdff 0%, #f8fbfe 100%);
+      overflow: hidden;
+    }
+
+    .cells {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      z-index: 2;
+    }
+
+    .cell {
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      background: transparent;
+    }
+
+    .avatar {
+      width: 66px;
+      height: 66px;
+      border-radius: 999px;
+      border: 2px solid var(--accent);
+      background: #dde8ff;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 6px;
+      line-height: 1.1;
+    }
+
+    .name {
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .team {
+      margin-top: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .team.good { color: var(--good); }
+    .team.evil { color: var(--evil); }
+
+    svg {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .legend {
+      padding: 14px 16px 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      margin-right: 8px;
+    }
+
+    .dot.good { background: var(--good); }
+    .dot.evil { background: var(--evil); }
+
+    .share-btn {
+      display: none;
+      padding: 12px 22px;
+      font-size: 14px;
+      font-weight: 700;
+      border: 2px solid var(--accent);
+      background: var(--accent);
+      color: #ffffff;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .share-btn:hover {
+      background: #1e3a5f;
+    }
+
+    .share-btn.show {
+      display: inline-block;
+    }
+
+    .help-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid var(--muted);
+      background: transparent;
+      color: var(--muted);
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .help-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: transparent;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--panel);
+      border-radius: 14px;
+      padding: 32px;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(16, 24, 40, 0.3);
+      border: 1px solid var(--line);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      color: var(--ink);
+    }
+
+    .modal-body {
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <div class="title">Who's evil?</div>
+        <button id="helpBtn" class="help-btn">?</button>
+      </div>
+      <div class="controls">
+        <div class="controls-main">
+          <label for="gridSize">Grid:</label>
+          <select id="gridSize">
+            <option value="2">2x2</option>
+            <option value="3" selected>3x3</option>
+          </select>
+          <button id="newPuzzleBtn">New Puzzle</button>
+        </div>
+        <div class="controls-right">
+          <div id="livesDisplay" class="lives">Lives: 3</div>
+          <button id="shareBtn" class="share-btn">Share</button>
+          <button id="guessBtn" class="guess-btn">GUESS</button>
+        </div>
+      </div>
+      <div id="status" class="status">Click players to mark good or evil, then press GUESS. Correct guesses get confirmed.</div>
+    </div>
+
+    <div class="board-wrap">
+      <div id="board" class="board">
+        <svg id="arrows"></svg>
+        <div id="cells" class="cells"></div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div><span class="dot good"></span>Green arrow: Claims target is good.</div>
+      <div><span class="dot evil"></span>Red arrow: Claims target is evil.</div>
+      <div>Only the good players can be trusted. Your job is to identify who are good and who are evil.</div>
+      <div id="evilRangeLine"></div>
+    </div>
+  </div>
+
+  <div id="helpModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">How to Play</div>
+        <button class="modal-close" id="modalCloseBtn">&times;</button>
+      </div>
+      <div class="modal-body">You know when you play social deduction games like mafia or blood on the clock tower. Then often there are good and evil players all claiming what teams other players are on. For example Alex might say "Blake is evil and Casey is good". The problem is that if Alex is evil you don't know if their claims are true.
+        
+Since I'm a mathematician i just abstracted away the sentences into red and green arrows.
+
+Inspired by the Clues by Sam game (if it was cool and the evil people actually lied).</div>
+    </div>
+  </div>
+
+  <script>
+    const FIRST_NAMES = [
+      "Alex", "Blake", "Casey", "Dana", "Evan", "Fiona", "Gabe", "Harper",
+      "Iris", "Jade", "Kai", "Luna", "Max", "Noah", "Oscar", "Parker"
+    ];
+
+    let currentCharacters = null;
+    let GRID_SIZE = 3;
+    let NUM_PLAYERS = GRID_SIZE * GRID_SIZE;
+    let lives = 3;
+    let guessCount = 0;
+    let guessHistory = [];
+    let guessMarks = [];
+    let confirmedMarks = [];
+    let guessElements = [];
+    let gameResolved = false;
+    let rngSeed = 0;
+
+    function getTodaysSeed() {
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0];
+      return parseInt(dateStr.replace(/-/g, ''), 10);
+    }
+
+    function seededRandom() {
+      rngSeed = (rngSeed * 9301 + 49297) % 233280;
+      return rngSeed / 233280;
+    }
+
+    function initializeSeededRandom() {
+      rngSeed = getTodaysSeed() % 233280;
+    }
+
+    function randInt(min, max) {
+      return Math.floor(seededRandom() * (max - min + 1)) + min;
+    }
+
+    function choose(arr) {
+      return arr[randInt(0, arr.length - 1)];
+    }
+
+    function shuffleCopy(arr) {
+      const out = arr.slice();
+      for (let i = out.length - 1; i > 0; i--) {
+        const j = randInt(0, i);
+        [out[i], out[j]] = [out[j], out[i]];
+      }
+      return out;
+    }
+
+    function sample(arr, n) {
+      return shuffleCopy(arr).slice(0, n);
+    }
+
+    function getEvilBounds() {
+      if (NUM_PLAYERS <= 4) return [1, 2];
+      if (NUM_PLAYERS <= 9) return [2, 4];
+      const minEvil = Math.max(2, Math.floor(NUM_PLAYERS / 4));
+      const maxEvil = Math.max(minEvil, Math.floor(NUM_PLAYERS / 2));
+      return [minEvil, maxEvil];
+    }
+
+    function getNeighbors(index) {
+      const row = Math.floor(index / GRID_SIZE);
+      const col = index % GRID_SIZE;
+      const neighbors = [];
+
+      for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          if (dr === 0 && dc === 0) continue;
+          const nr = row + dr;
+          const nc = col + dc;
+          if (nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE) {
+            neighbors.push(nr * GRID_SIZE + nc);
+          }
+        }
+      }
+
+      return neighbors;
+    }
+
+    function generateStatement(characterIndex, characters, maxStatements) {
+      const neighbors = getNeighbors(characterIndex);
+      if (neighbors.length === 0) return [];
+
+      const count = randInt(1, Math.min(maxStatements, neighbors.length));
+      const mentioned = sample(neighbors, count);
+      const team = characters[characterIndex].team;
+
+      return mentioned.map((neighborIdx) => {
+        if (team === "Good") {
+          return {
+            about: neighborIdx,
+            claim: characters[neighborIdx].team === "Good" ? "good" : "evil"
+          };
+        }
+        return {
+          about: neighborIdx,
+          claim: choose(["good", "evil"])
+        };
+      });
+    }
+
+    function buildGrid(maxStatements) {
+      const pool = shuffleCopy(FIRST_NAMES);
+      const characters = [];
+      for (let i = 0; i < NUM_PLAYERS; i++) {
+        characters.push({ name: pool[i], statements: [] });
+      }
+
+      const [minEvil, maxEvil] = getEvilBounds();
+      const numEvils = randInt(minEvil, maxEvil);
+      const evilIndices = new Set(sample([...Array(NUM_PLAYERS).keys()], numEvils));
+
+      characters.forEach((char, i) => {
+        char.team = evilIndices.has(i) ? "Evil" : "Good";
+      });
+
+      for (let i = 0; i < NUM_PLAYERS; i++) {
+        characters[i].statements = generateStatement(i, characters, maxStatements);
+      }
+
+      return characters;
+    }
+
+    function buildUniverseFromMask(mask) {
+      const universe = [];
+      for (let i = 0; i < NUM_PLAYERS; i++) {
+        universe.push(((mask >> i) & 1) ? "Evil" : "Good");
+      }
+      return universe;
+    }
+
+    function goodPlayerLiesInUniverse(characters, universe) {
+      for (let speaker = 0; speaker < NUM_PLAYERS; speaker++) {
+        if (universe[speaker] !== "Good") continue;
+        for (const stmt of characters[speaker].statements) {
+          const actual = universe[stmt.about];
+          if (stmt.claim === "good" && actual !== "Good") return true;
+          if (stmt.claim === "evil" && actual !== "Evil") return true;
+        }
+      }
+      return false;
+    }
+
+    function countPossibleUniverses(characters) {
+      let count = 0;
+      let uniqueUniverse = null;
+      const [minEvil, maxEvil] = getEvilBounds();
+
+      for (let mask = 0; mask < (1 << NUM_PLAYERS); mask++) {
+        const universe = buildUniverseFromMask(mask);
+        const evilCount = universe.reduce((acc, t) => acc + (t === "Evil" ? 1 : 0), 0);
+        if (evilCount < minEvil || evilCount > maxEvil) continue;
+
+        if (goodPlayerLiesInUniverse(characters, universe)) continue;
+
+        count += 1;
+        if (count === 1) uniqueUniverse = universe;
+        if (count > 1) return [count, null];
+      }
+
+      return [count, uniqueUniverse];
+    }
+
+    function generateGrid() {
+      const generationPlan = [
+        [10, 1],
+        [60, 2],
+        [120, 3],
+        [200, 4],
+      ];
+
+      let generationCount = 0;
+      for (const [attempts, maxStatements] of generationPlan) {
+        for (let i = 0; i < attempts; i++) {
+          generationCount += 1;
+          const characters = buildGrid(maxStatements);
+          const [possibleCount] = countPossibleUniverses(characters);
+          if (possibleCount === 1) {
+            return [characters, generationCount, true];
+          }
+        }
+      }
+
+      return [null, generationCount, false];
+    }
+
+    function setStatus(text) {
+      document.getElementById("status").textContent = text;
+    }
+
+    function setLivesDisplay() {
+      document.getElementById("livesDisplay").textContent = `Lives: ${lives}`;
+    }
+
+    function markLabelFromGuess(index) {
+      if (confirmedMarks[index]) {
+        return guessMarks[index] === "Good" ? "good" : "evil";
+      }
+      if (guessMarks[index] === null) return "";
+      if (guessMarks[index] === "Good") return "good?";
+      return "evil?";
+    }
+
+    function setGuessLabel(index) {
+      const labelEl = guessElements[index];
+      labelEl.textContent = markLabelFromGuess(index);
+      labelEl.classList.remove("good", "evil");
+      if (guessMarks[index] === "Good") labelEl.classList.add("good");
+      if (guessMarks[index] === "Evil") labelEl.classList.add("evil");
+    }
+
+    function revealAllTeams() {
+      for (let i = 0; i < NUM_PLAYERS; i++) {
+        const labelEl = guessElements[i];
+        labelEl.textContent = currentCharacters[i].team;
+        labelEl.classList.remove("good", "evil");
+        labelEl.classList.add(currentCharacters[i].team === "Good" ? "good" : "evil");
+      }
+    }
+
+    function renderBoard(characters) {
+      const board = document.getElementById("board");
+      const cellsLayer = document.getElementById("cells");
+      const svg = document.getElementById("arrows");
+      const [minEvil, maxEvil] = getEvilBounds();
+
+      const cellSize = 150;
+      const width = cellSize * GRID_SIZE;
+      const height = cellSize * GRID_SIZE;
+      board.style.width = width + "px";
+      board.style.height = height + "px";
+      cellsLayer.style.gridTemplateColumns = `repeat(${GRID_SIZE}, 1fr)`;
+      cellsLayer.style.gridTemplateRows = `repeat(${GRID_SIZE}, 1fr)`;
+      cellsLayer.innerHTML = "";
+
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      svg.innerHTML = `
+        <defs>
+          <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,4 L0,8 z" fill="#1b7f3a"></path>
+          </marker>
+          <marker id="arrowRed" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,4 L0,8 z" fill="#b42318"></path>
+          </marker>
+        </defs>
+      `;
+
+      const centers = [];
+      guessMarks = Array(NUM_PLAYERS).fill(null);
+      confirmedMarks = Array(NUM_PLAYERS).fill(false);
+      guessElements = Array(NUM_PLAYERS).fill(null);
+      for (let i = 0; i < NUM_PLAYERS; i++) {
+        const row = Math.floor(i / GRID_SIZE);
+        const col = i % GRID_SIZE;
+        const cx = col * cellSize + cellSize / 2;
+        const cy = row * cellSize + cellSize / 2;
+        centers.push([cx, cy]);
+
+        const cell = document.createElement("div");
+        cell.className = "cell";
+
+        const avatar = document.createElement("div");
+        avatar.className = "avatar";
+        const name = document.createElement("div");
+        name.className = "name";
+        name.textContent = characters[i].name;
+        const team = document.createElement("div");
+        team.className = "team";
+        team.textContent = "";
+        guessElements[i] = team;
+
+        avatar.appendChild(name);
+        avatar.appendChild(team);
+        cell.appendChild(avatar);
+
+        cell.addEventListener("click", () => {
+          if (gameResolved || confirmedMarks[i]) return;
+
+          if (guessMarks[i] === null) {
+            guessMarks[i] = "Good";
+          } else if (guessMarks[i] === "Good") {
+            guessMarks[i] = "Evil";
+          } else {
+            guessMarks[i] = "Good";
+          }
+          setGuessLabel(i);
+        });
+
+        cellsLayer.appendChild(cell);
+      }
+
+      for (let speaker = 0; speaker < NUM_PLAYERS; speaker++) {
+        const [sx, sy] = centers[speaker];
+        for (const stmt of characters[speaker].statements) {
+          const [tx, ty] = centers[stmt.about];
+          const color = stmt.claim === "good" ? "#1b7f3a" : "#b42318";
+          const marker = stmt.claim === "good" ? "url(#arrowGreen)" : "url(#arrowRed)";
+
+          const dx = tx - sx;
+          const dy = ty - sy;
+          const len = Math.max(Math.hypot(dx, dy), 1);
+          const ux = dx / len;
+          const uy = dy / len;
+          const perpX = -uy;
+          const perpY = ux;
+
+          const startPad = 30 + seededRandom() * 10;
+          const endPad = 30 + seededRandom() * 10;
+          const startX = sx + ux * startPad + (seededRandom() * 20 - 10);
+          const startY = sy + uy * startPad + (seededRandom() * 20 - 10);
+          const endX = tx - ux * endPad + (seededRandom() * 20 - 10);
+          const endY = ty - uy * endPad + (seededRandom() * 20 - 10);
+
+          const curveAmount = 12 + seededRandom() * 10;
+          const midX = (startX + endX) / 2 + perpX * curveAmount;
+          const midY = (startY + endY) / 2 + perpY * curveAmount;
+
+          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          path.setAttribute("d", `M ${startX.toFixed(1)} ${startY.toFixed(1)} Q ${midX.toFixed(1)} ${midY.toFixed(1)} ${endX.toFixed(1)} ${endY.toFixed(1)}`);
+          path.setAttribute("stroke", color);
+          path.setAttribute("stroke-width", "4");
+          path.setAttribute("fill", "none");
+          path.setAttribute("marker-end", marker);
+          path.setAttribute("opacity", "1");
+          svg.appendChild(path);
+        }
+      }
+
+      document.getElementById("evilRangeLine").textContent = `Possible evil count: ${minEvil}-${maxEvil}`;
+    }
+
+    function submitGuess() {
+      if (!currentCharacters || gameResolved) return;
+
+      const hasAnyGuess = guessMarks.some((g) => g !== null);
+      if (!hasAnyGuess) {
+        setStatus("Make at least one guess before pressing GUESS.");
+        return;
+      }
+
+      guessCount += 1;
+
+      let hasWrong = false;
+      let newConfirms = 0;
+
+      for (let i = 0; i < NUM_PLAYERS; i++) {
+        if (guessMarks[i] === null || confirmedMarks[i]) continue;
+
+        const isCorrect = guessMarks[i] === currentCharacters[i].team;
+        if (isCorrect) {
+          confirmedMarks[i] = true;
+          newConfirms += 1;
+          setGuessLabel(i);
+        } else {
+          hasWrong = true;
+        }
+      }
+
+      const totalConfirmed = confirmedMarks.filter(c => c).length;
+
+      if (hasWrong) {
+        guessHistory.push(false);
+        lives -= 1;
+        setLivesDisplay();
+        if (lives <= 0) {
+          gameResolved = true;
+          document.getElementById("shareBtn").classList.add("show");
+          setStatus("No lives left. You lost. No team information revealed.");
+        } else {
+          setStatus(`Some guesses were wrong! ${totalConfirmed}/${NUM_PLAYERS} confirmed. Lives: ${lives}`);
+        }
+        return;
+      }
+
+      if (totalConfirmed === NUM_PLAYERS) {
+        guessHistory.push(true);
+        gameResolved = true;
+        document.getElementById("shareBtn").classList.add("show");
+        setStatus("Perfect! All players confirmed!");
+        return;
+      }
+
+      guessHistory.push(true);
+      setStatus(`${totalConfirmed}/${NUM_PLAYERS} confirmed! Continue guessing.`);
+    }
+
+    function shareResult() {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const emojiSquares = guessHistory.map(success => success ? "🟩" : "🟥").join("");
+      const message = `Solved Bror's deduction game (${dateStr}) in ${guessCount} guesses! ${emojiSquares}`;
+      
+      navigator.clipboard.writeText(message).then(() => {
+        const shareBtn = document.getElementById("shareBtn");
+        const originalText = shareBtn.textContent;
+        shareBtn.textContent = "Copied!";
+        setTimeout(() => {
+          shareBtn.textContent = originalText;
+        }, 2000);
+      });
+    }
+
+    function buildNewPuzzle() {
+      initializeSeededRandom();
+      GRID_SIZE = parseInt(document.getElementById("gridSize").value, 10);
+      NUM_PLAYERS = GRID_SIZE * GRID_SIZE;
+      lives = 3;
+      guessCount = 0;
+      guessHistory = [];
+      gameResolved = false;
+      setLivesDisplay();
+      document.getElementById("shareBtn").classList.remove("show");
+
+      setStatus("Generating puzzle...");
+      setTimeout(() => {
+        const [characters, attempts, ok] = generateGrid();
+        if (!ok) {
+          currentCharacters = null;
+          document.getElementById("cells").innerHTML = "";
+          document.getElementById("arrows").innerHTML = "";
+          setStatus(`Could not generate a uniquely solvable puzzle after ${attempts} generations.`);
+          return;
+        }
+
+        currentCharacters = characters;
+        renderBoard(characters);
+        setStatus(`Click players to mark good or evil, then press GUESS. Correct guesses get confirmed.`); 
+      }, 10);
+    }
+
+    document.getElementById("newPuzzleBtn").addEventListener("click", buildNewPuzzle);
+    document.getElementById("guessBtn").addEventListener("click", submitGuess);
+    document.getElementById("shareBtn").addEventListener("click", shareResult);
+    document.getElementById("gridSize").addEventListener("change", buildNewPuzzle);
+
+    const helpBtn = document.getElementById("helpBtn");
+    const helpModal = document.getElementById("helpModal");
+    const modalCloseBtn = document.getElementById("modalCloseBtn");
+
+    helpBtn.addEventListener("click", () => {
+      helpModal.classList.add("show");
+    });
+
+    modalCloseBtn.addEventListener("click", () => {
+      helpModal.classList.remove("show");
+    });
+
+    helpModal.addEventListener("click", (e) => {
+      if (e.target === helpModal) {
+        helpModal.classList.remove("show");
+      }
+    });
+
+    buildNewPuzzle();
+  </script>
+</body>
+</html>
