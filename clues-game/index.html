@@ -647,7 +647,7 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
           } else if (guessMarks[i] === "Good") {
             guessMarks[i] = "Evil";
           } else {
-            guessMarks[i] = "Good";
+            guessMarks[i] = null;
           }
           setGuessLabel(i);
         });
@@ -706,6 +706,7 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
 
       guessCount += 1;
 
+      // First, check if all guesses are correct (all-or-nothing validation)
       let hasWrong = false;
       let newConfirms = 0;
 
@@ -713,16 +714,12 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
         if (guessMarks[i] === null || confirmedMarks[i]) continue;
 
         const isCorrect = guessMarks[i] === currentCharacters[i].team;
-        if (isCorrect) {
-          confirmedMarks[i] = true;
-          newConfirms += 1;
-          setGuessLabel(i);
-        } else {
+        if (!isCorrect) {
           hasWrong = true;
+          break;
         }
+        newConfirms += 1;
       }
-
-      const totalConfirmed = confirmedMarks.filter(c => c).length;
 
       if (hasWrong) {
         guessHistory.push(false);
@@ -733,10 +730,21 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
           document.getElementById("shareBtn").classList.add("show");
           setStatus("No lives left. You lost. No team information revealed.");
         } else {
-          setStatus(`Some guesses were wrong! ${totalConfirmed}/${NUM_PLAYERS} confirmed. Lives: ${lives}`);
+          const totalConfirmed = confirmedMarks.filter(c => c).length;
+          setStatus(`Wrong guess! ${totalConfirmed}/${NUM_PLAYERS} confirmed. Lives: ${lives}`);
         }
         return;
       }
+
+      // All guesses were correct, so confirm them all
+      for (let i = 0; i < NUM_PLAYERS; i++) {
+        if (guessMarks[i] !== null && !confirmedMarks[i]) {
+          confirmedMarks[i] = true;
+          setGuessLabel(i);
+        }
+      }
+
+      const totalConfirmed = confirmedMarks.filter(c => c).length;
 
       if (totalConfirmed === NUM_PLAYERS) {
         guessHistory.push(true);
