@@ -27,11 +27,11 @@
       min-height: 100vh;
       display: grid;
       place-items: center;
-      padding: 20px;
+      padding: clamp(10px, 2.5vw, 20px);
     }
 
     .app {
-      width: min(1000px, 96vw);
+      width: min(1000px, 100%);
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 14px;
@@ -54,11 +54,18 @@
       font-weight: 700;
     }
 
+    .title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .controls {
       display: flex;
       gap: 10px;
       align-items: center;
       flex-wrap: wrap;
+      width: 100%;
     }
 
     .controls-main {
@@ -73,6 +80,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
     button, select {
@@ -96,6 +104,7 @@
       background: #d93f2f;
       color: #ffffff;
       min-width: 140px;
+      min-height: 44px;
     }
 
     .guess-btn:hover {
@@ -113,10 +122,11 @@
       color: var(--muted);
       font-size: 14px;
       margin-top: 4px;
+      line-height: 1.4;
     }
 
     .board-wrap {
-      padding: 16px;
+      padding: clamp(8px, 2.5vw, 16px);
     }
 
     .board {
@@ -146,8 +156,8 @@
     }
 
     .avatar {
-      width: 66px;
-      height: 66px;
+      width: var(--avatar-size, 66px);
+      height: var(--avatar-size, 66px);
       border-radius: 999px;
       border: 2px solid var(--accent);
       background: #dde8ff;
@@ -159,13 +169,13 @@
     }
 
     .name {
-      font-size: 12px;
+      font-size: var(--name-size, 12px);
       font-weight: 700;
     }
 
     .team {
       margin-top: 4px;
-      font-size: 11px;
+      font-size: var(--team-size, 11px);
       font-weight: 700;
       color: #334155;
     }
@@ -306,12 +316,99 @@
       white-space: pre-wrap;
       word-wrap: break-word;
     }
+
+    @media (max-width: 760px) {
+      .app {
+        border-radius: 12px;
+      }
+
+      .topbar {
+        padding: 12px;
+        gap: 10px;
+      }
+
+      .controls {
+        gap: 8px;
+      }
+
+      .controls-main,
+      .controls-right {
+        width: 100%;
+      }
+
+      .controls-main {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .controls-right {
+        margin-left: 0;
+        justify-content: space-between;
+      }
+
+      .guess-btn,
+      .share-btn {
+        min-width: 110px;
+        padding: 10px 14px;
+        font-size: 15px;
+      }
+
+      .lives {
+        font-size: 14px;
+      }
+
+      .legend {
+        padding: 10px 12px 12px;
+        font-size: 13px;
+      }
+
+      .modal {
+        padding: 12px;
+      }
+
+      .modal-content {
+        padding: 18px;
+        max-height: 86vh;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .title {
+        font-size: 17px;
+      }
+
+      .controls-main {
+        grid-template-columns: 1fr;
+      }
+
+      .controls-main label {
+        font-size: 13px;
+      }
+
+      .controls-main select,
+      .controls-main button,
+      .controls-right button {
+        width: 100%;
+      }
+
+      .controls-right {
+        gap: 8px;
+      }
+
+      .help-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="app">
     <div class="topbar">
-      <div style="display: flex; align-items: center; gap: 8px;">
+      <div class="title-wrap">
         <div class="title">Who's evil?</div>
         <button id="helpBtn" class="help-btn">?</button>
       </div>
@@ -364,8 +461,8 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
 
   <script>
     const FIRST_NAMES = [
-      "Alex", "Blake", "Casey", "Dana", "Evan", "Fiona", "Gabe", "Harper",
-      "Iris", "Jade", "Kai", "Luna", "Max", "Noah", "Oscar", "Parker"
+      "Bert", "Bror", "Bror2", "Casey", "David", "Eve", "Fiona", "Gabe", "Hannes", "Hannes2", "Hilda",
+      "Kyoto", "Johan", "Kai", "Lycke", "Ludvig", "Max", "Noel", "Oscar",
     ];
 
     let currentCharacters = null;
@@ -378,6 +475,7 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
     let confirmedMarks = [];
     let guessElements = [];
     let gameResolved = false;
+    let isDailyPuzzle = false;
     let rngSeed = 0;
 
     function getTodaysSeed() {
@@ -386,13 +484,31 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
       return parseInt(dateStr.replace(/-/g, ''), 10);
     }
 
+    function getRandomSeed() {
+      let seed;
+      if (window.crypto && window.crypto.getRandomValues) {
+        const buf = new Uint32Array(1);
+        window.crypto.getRandomValues(buf);
+        seed = buf[0];
+      } else {
+        seed = Date.now() ^ Math.floor(Math.random() * 1e9);
+      }
+
+      seed = Math.abs(seed) % 233280;
+      const dailySeed = getTodaysSeed() % 233280;
+      if (seed === dailySeed) {
+        seed = (seed + 1) % 233280;
+      }
+      return seed;
+    }
+
     function seededRandom() {
       rngSeed = (rngSeed * 9301 + 49297) % 233280;
       return rngSeed / 233280;
     }
 
-    function initializeSeededRandom() {
-      rngSeed = getTodaysSeed() % 233280;
+    function initializeSeededRandom(useDailySeed) {
+      rngSeed = useDailySeed ? (getTodaysSeed() % 233280) : getRandomSeed();
     }
 
     function randInt(min, max) {
@@ -588,25 +704,40 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
       const board = document.getElementById("board");
       const cellsLayer = document.getElementById("cells");
       const svg = document.getElementById("arrows");
+      const boardWrap = document.querySelector(".board-wrap");
       const [minEvil, maxEvil] = getEvilBounds();
 
-      const cellSize = 150;
+      const wrapStyles = window.getComputedStyle(boardWrap);
+      const padX = parseFloat(wrapStyles.paddingLeft) + parseFloat(wrapStyles.paddingRight);
+      const availableWidth = Math.max(boardWrap.clientWidth - padX - 2, 180);
+      const maxCellSize = GRID_SIZE === 2 ? 180 : 150;
+      const minCellSize = GRID_SIZE === 2 ? 86 : 64;
+      const cellSize = Math.max(
+        minCellSize,
+        Math.min(maxCellSize, Math.floor(availableWidth / GRID_SIZE))
+      );
       const width = cellSize * GRID_SIZE;
       const height = cellSize * GRID_SIZE;
       board.style.width = width + "px";
       board.style.height = height + "px";
+      board.style.setProperty("--avatar-size", `${Math.max(44, Math.floor(cellSize * 0.44))}px`);
+      board.style.setProperty("--name-size", `${Math.max(10, Math.floor(cellSize * 0.08))}px`);
+      board.style.setProperty("--team-size", `${Math.max(10, Math.floor(cellSize * 0.075))}px`);
       cellsLayer.style.gridTemplateColumns = `repeat(${GRID_SIZE}, 1fr)`;
       cellsLayer.style.gridTemplateRows = `repeat(${GRID_SIZE}, 1fr)`;
       cellsLayer.innerHTML = "";
 
       svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      const markerSize = window.innerWidth <= 420 ? 5 : (window.innerWidth <= 760 ? 6 : 8);
+      const markerRefX = markerSize - 1;
+      const markerRefY = markerSize / 2;
       svg.innerHTML = `
         <defs>
-          <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
-            <path d="M0,0 L8,4 L0,8 z" fill="#1b7f3a"></path>
+          <marker id="arrowGreen" markerWidth="${markerSize}" markerHeight="${markerSize}" refX="${markerRefX}" refY="${markerRefY}" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L${markerSize},${markerRefY} L0,${markerSize} z" fill="#1b7f3a"></path>
           </marker>
-          <marker id="arrowRed" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
-            <path d="M0,0 L8,4 L0,8 z" fill="#b42318"></path>
+          <marker id="arrowRed" markerWidth="${markerSize}" markerHeight="${markerSize}" refX="${markerRefX}" refY="${markerRefY}" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L${markerSize},${markerRefY} L0,${markerSize} z" fill="#b42318"></path>
           </marker>
         </defs>
       `;
@@ -657,7 +788,8 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
 
       for (let speaker = 0; speaker < NUM_PLAYERS; speaker++) {
         const [sx, sy] = centers[speaker];
-        for (const stmt of characters[speaker].statements) {
+        for (let stmtIndex = 0; stmtIndex < characters[speaker].statements.length; stmtIndex++) {
+          const stmt = characters[speaker].statements[stmtIndex];
           const [tx, ty] = centers[stmt.about];
           const color = stmt.claim === "good" ? "#1b7f3a" : "#b42318";
           const marker = stmt.claim === "good" ? "url(#arrowGreen)" : "url(#arrowRed)";
@@ -670,14 +802,15 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
           const perpX = -uy;
           const perpY = ux;
 
-          const startPad = 30 + seededRandom() * 10;
-          const endPad = 30 + seededRandom() * 10;
-          const startX = sx + ux * startPad + (seededRandom() * 20 - 10);
-          const startY = sy + uy * startPad + (seededRandom() * 20 - 10);
-          const endX = tx - ux * endPad + (seededRandom() * 20 - 10);
-          const endY = ty - uy * endPad + (seededRandom() * 20 - 10);
+          const normalOffset = Math.max(4, Math.floor(cellSize * 0.06));
+          const startPad = 34;
+          const endPad = 34;
+          const startX = sx + ux * startPad + perpX * normalOffset;
+          const startY = sy + uy * startPad + perpY * normalOffset;
+          const endX = tx - ux * endPad + perpX * normalOffset;
+          const endY = ty - uy * endPad + perpY * normalOffset;
 
-          const curveAmount = 12 + seededRandom() * 10;
+          const curveAmount = normalOffset * 0.6;
           const midX = (startX + endX) / 2 + perpX * curveAmount;
           const midY = (startY + endY) / 2 + perpY * curveAmount;
 
@@ -727,7 +860,9 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
         setLivesDisplay();
         if (lives <= 0) {
           gameResolved = true;
-          document.getElementById("shareBtn").classList.add("show");
+          if (isDailyPuzzle) {
+            document.getElementById("shareBtn").classList.add("show");
+          }
           setStatus("No lives left. You lost. No team information revealed.");
         } else {
           const totalConfirmed = confirmedMarks.filter(c => c).length;
@@ -749,7 +884,9 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
       if (totalConfirmed === NUM_PLAYERS) {
         guessHistory.push(true);
         gameResolved = true;
-        document.getElementById("shareBtn").classList.add("show");
+        if (isDailyPuzzle) {
+          document.getElementById("shareBtn").classList.add("show");
+        }
         setStatus("Perfect! All players confirmed!");
         return;
       }
@@ -758,24 +895,78 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
       setStatus(`${totalConfirmed}/${NUM_PLAYERS} confirmed! Continue guessing.`);
     }
 
-    function shareResult() {
+    function copyTextFallback(text) {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.top = "-9999px";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      let copied = false;
+      try {
+        copied = document.execCommand("copy");
+      } catch (_err) {
+        copied = false;
+      }
+      document.body.removeChild(textarea);
+      return copied;
+    }
+
+    function flashShareButton(text, ms = 2000) {
+      const shareBtn = document.getElementById("shareBtn");
+      const originalText = shareBtn.textContent;
+      shareBtn.textContent = text;
+      setTimeout(() => {
+        shareBtn.textContent = originalText;
+      }, ms);
+    }
+
+    async function shareResult() {
+      if (!isDailyPuzzle) return;
+
       const now = new Date();
       const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
       const emojiSquares = guessHistory.map(success => success ? "🟩" : "🟥").join("");
-      const message = `Solved Bror's deduction game (${dateStr}) in ${guessCount} guesses! ${emojiSquares}`;
-      
-      navigator.clipboard.writeText(message).then(() => {
-        const shareBtn = document.getElementById("shareBtn");
-        const originalText = shareBtn.textContent;
-        shareBtn.textContent = "Copied!";
-        setTimeout(() => {
-          shareBtn.textContent = originalText;
-        }, 2000);
-      });
+      const message = `Solved Bror's deduction game (${dateStr}) in ${guessCount} guess(es)! https://beppep.github.io/clues-game/\n ${emojiSquares}`;
+      const prefersNativeShare =
+        window.matchMedia("(pointer: coarse)").matches ||
+        /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+      if (prefersNativeShare && navigator.share) {
+        try {
+          await navigator.share({ text: message });
+          flashShareButton("Shared!");
+          return;
+        } catch (err) {
+          // If the user cancels, do not show an error/fallback message.
+          if (err && err.name === "AbortError") return;
+        }
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+          await navigator.clipboard.writeText(message);
+          flashShareButton("Copied!");
+          return;
+        } catch (_err) {
+          // Fall through to legacy copy fallback.
+        }
+      }
+
+      if (copyTextFallback(message)) {
+        flashShareButton("Copied!");
+      } else {
+        flashShareButton("Copy failed", 2500);
+        setStatus("Could not auto-copy. Long-press and copy manually:");
+      }
     }
 
-    function buildNewPuzzle() {
-      initializeSeededRandom();
+    function buildNewPuzzle(useDailySeed = false) {
+      isDailyPuzzle = useDailySeed;
+      initializeSeededRandom(useDailySeed);
       GRID_SIZE = parseInt(document.getElementById("gridSize").value, 10);
       NUM_PLAYERS = GRID_SIZE * GRID_SIZE;
       lives = 3;
@@ -802,10 +993,10 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
       }, 10);
     }
 
-    document.getElementById("newPuzzleBtn").addEventListener("click", buildNewPuzzle);
+    document.getElementById("newPuzzleBtn").addEventListener("click", () => buildNewPuzzle(false));
     document.getElementById("guessBtn").addEventListener("click", submitGuess);
     document.getElementById("shareBtn").addEventListener("click", shareResult);
-    document.getElementById("gridSize").addEventListener("change", buildNewPuzzle);
+    document.getElementById("gridSize").addEventListener("change", () => buildNewPuzzle(false));
 
     const helpBtn = document.getElementById("helpBtn");
     const helpModal = document.getElementById("helpModal");
@@ -825,7 +1016,7 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
       }
     });
 
-    buildNewPuzzle();
+    buildNewPuzzle(true);
   </script>
 </body>
 </html>
