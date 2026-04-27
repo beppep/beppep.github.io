@@ -734,10 +734,10 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
       svg.innerHTML = `
         <defs>
           <marker id="arrowGreen" markerWidth="${markerSize}" markerHeight="${markerSize}" refX="${markerRefX}" refY="${markerRefY}" orient="auto" markerUnits="strokeWidth">
-            <path d="M0,0 L${markerSize},${markerRefY} L0,${markerSize} z" fill="#1b7f3a"></path>
+            <path d="M0,0 L${markerSize},${markerRefY} L0,${markerSize} z" fill="#16f75c"></path>
           </marker>
           <marker id="arrowRed" markerWidth="${markerSize}" markerHeight="${markerSize}" refX="${markerRefX}" refY="${markerRefY}" orient="auto" markerUnits="strokeWidth">
-            <path d="M0,0 L${markerSize},${markerRefY} L0,${markerSize} z" fill="#b42318"></path>
+            <path d="M0,0 L${markerSize},${markerRefY} L0,${markerSize} z" fill="#a80d02"></path>
           </marker>
         </defs>
       `;
@@ -791,7 +791,7 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
         for (let stmtIndex = 0; stmtIndex < characters[speaker].statements.length; stmtIndex++) {
           const stmt = characters[speaker].statements[stmtIndex];
           const [tx, ty] = centers[stmt.about];
-          const color = stmt.claim === "good" ? "#1b7f3a" : "#b42318";
+          const color = stmt.claim === "good" ? "#16f75c" : "#a80d02";
           const marker = stmt.claim === "good" ? "url(#arrowGreen)" : "url(#arrowRed)";
 
           const dx = tx - sx;
