@@ -732,6 +732,9 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
       const markerSize = window.innerWidth <= 420 ? 5 : (window.innerWidth <= 760 ? 6 : 8);
       const markerRefX = markerSize - 1;
       const markerRefY = markerSize / 2;
+      // Thinner strokes on the denser 4x4 board -> smaller lines AND arrowheads
+      // (the markers use markerUnits="strokeWidth", so they scale with this).
+      const arrowStroke = GRID_SIZE === 4 ? 3 : 4;
       svg.innerHTML = `
         <defs>
           <marker id="arrowGreen" markerWidth="${markerSize}" markerHeight="${markerSize}" refX="${markerRefX}" refY="${markerRefY}" orient="auto" markerUnits="strokeWidth">
@@ -818,7 +821,7 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
           const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
           path.setAttribute("d", `M ${startX.toFixed(1)} ${startY.toFixed(1)} Q ${midX.toFixed(1)} ${midY.toFixed(1)} ${endX.toFixed(1)} ${endY.toFixed(1)}`);
           path.setAttribute("stroke", color);
-          path.setAttribute("stroke-width", "4");
+          path.setAttribute("stroke-width", String(arrowStroke));
           path.setAttribute("fill", "none");
           path.setAttribute("marker-end", marker);
           path.setAttribute("opacity", "1");
