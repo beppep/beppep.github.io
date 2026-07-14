@@ -166,6 +166,18 @@
       text-align: center;
       padding: 6px;
       line-height: 1.1;
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+
+    /* Once a player is confirmed, tint the whole circle a soft green / red. */
+    .avatar.confirmed-good {
+      background: #cdeccf;
+      border-color: var(--good);
+    }
+
+    .avatar.confirmed-evil {
+      background: #f3d4cf;
+      border-color: var(--evil);
     }
 
     .name {
@@ -690,6 +702,14 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
       labelEl.classList.remove("good", "evil");
       if (guessMarks[index] === "Good") labelEl.classList.add("good");
       if (guessMarks[index] === "Evil") labelEl.classList.add("evil");
+      // Tint the whole circle a soft green/red once the mark is confirmed.
+      const avatarEl = labelEl.parentElement;
+      if (avatarEl) {
+        avatarEl.classList.remove("confirmed-good", "confirmed-evil");
+        if (confirmedMarks[index]) {
+          avatarEl.classList.add(guessMarks[index] === "Good" ? "confirmed-good" : "confirmed-evil");
+        }
+      }
     }
 
     function revealAllTeams() {
@@ -698,6 +718,11 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
         labelEl.textContent = currentCharacters[i].team;
         labelEl.classList.remove("good", "evil");
         labelEl.classList.add(currentCharacters[i].team === "Good" ? "good" : "evil");
+        const avatarEl = labelEl.parentElement;
+        if (avatarEl) {
+          avatarEl.classList.remove("confirmed-good", "confirmed-evil");
+          avatarEl.classList.add(currentCharacters[i].team === "Good" ? "confirmed-good" : "confirmed-evil");
+        }
       }
     }
 
