@@ -760,6 +760,12 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
       // Thinner strokes on the denser 4x4 board -> smaller lines AND arrowheads
       // (the markers use markerUnits="strokeWidth", so they scale with this).
       const arrowStroke = GRID_SIZE === 4 ? 3 : 4;
+      // 4x4 circles are big relative to the short adjacent-cell spacing, so a fixed
+      // end padding eats most of the arrow. Tie the pad to the circle radius (and
+      // tuck 3px inside) so arrows always meet the circles and short adjacent ones
+      // still read as proper arrows at any cell size.
+      const avatarSize = Math.max(44, Math.floor(cellSize * 0.44));
+      const arrowPad = GRID_SIZE === 4 ? Math.max(14, Math.floor(avatarSize / 2) - 3) : 34;
       svg.innerHTML = `
         <defs>
           <marker id="arrowGreen" markerWidth="${markerSize}" markerHeight="${markerSize}" refX="${markerRefX}" refY="${markerRefY}" orient="auto" markerUnits="strokeWidth">
@@ -832,8 +838,8 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
           const perpY = ux;
 
           const normalOffset = Math.max(4, Math.floor(cellSize * 0.06));
-          const startPad = 34;
-          const endPad = 34;
+          const startPad = arrowPad;
+          const endPad = arrowPad;
           const startX = sx + ux * startPad + perpX * normalOffset;
           const startY = sy + uy * startPad + perpY * normalOffset;
           const endX = tx - ux * endPad + perpX * normalOffset;
