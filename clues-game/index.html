@@ -656,6 +656,33 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
       return [count, uniqueUniverse];
     }
 
+    // Try to delete as many arrows (statements) as possible while keeping
+    // the puzzle uniquely solvable. Goes through every arrow in random
+    // order, removes it, re-checks uniqueness, and only keeps the removal
+    // if the solution is still unique.
+    function pruneArrows(characters) {
+      const candidates = [];
+      for (let speaker = 0; speaker < NUM_PLAYERS; speaker++) {
+        for (const stmt of characters[speaker].statements) {
+          candidates.push({ speaker, stmt });
+        }
+      }
+
+      const order = shuffleCopy(candidates);
+      for (const { speaker, stmt } of order) {
+        const list = characters[speaker].statements;
+        const idx = list.indexOf(stmt);
+        if (idx === -1) continue;
+
+        list.splice(idx, 1);
+        const [possibleCount] = countPossibleUniverses(characters);
+        if (possibleCount !== 1) {
+          // Removing this arrow added solutions, put it back.
+          list.splice(idx, 0, stmt);
+        }
+      }
+    }
+
     function generateGrid() {
       const generationPlan = [
         [10, 1],
@@ -671,6 +698,7 @@ Inspired by the Clues by Sam game (if it was cool and the evil people actually l
           const characters = buildGrid(maxStatements);
           const [possibleCount] = countPossibleUniverses(characters);
           if (possibleCount === 1) {
+            pruneArrows(characters);
             return [characters, generationCount, true];
           }
         }
