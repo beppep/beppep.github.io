@@ -46,10 +46,16 @@ body {
   flex-wrap: wrap;             /* allow wrapping on small screens */
 }
 
-.videos iframe {
+.videos iframe,
+.videos img {
   flex: 1 1 400px;             /* flexible width, min 400px */
   max-width: 500px;            /* optional cap */
   aspect-ratio: 16 / 9;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+/* Screenshots sit in the same row as videos, cropped to the same shape */
+.videos img {
+  object-fit: cover;
 }
