@@ -74,6 +74,16 @@ body {
 
 .content a {
   margin: 2px 0;
+  color: #8fb3ff;              /* light blue, readable on the dark background */
+}
+
+.content a:visited {
+  color: #b9a6ff;
+}
+
+.content a:hover,
+.content a:focus-visible {
+  color: #c9d8ff;
 }
 
 .role {
