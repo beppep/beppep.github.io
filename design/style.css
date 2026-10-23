@@ -86,6 +86,13 @@ body {
   color: #c9d8ff;
 }
 
+/* Longer paragraphs: keep lines a comfortable length */
+.story {
+  max-width: 600px;
+  line-height: 1.5;
+  margin: 0 0 12px;
+}
+
 .role {
   opacity: 0.7;
   margin-top: -8px;
