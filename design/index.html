@@ -83,13 +83,16 @@
     <p class="links"><a href="https://beppep.github.io/stack-chess/" target="_blank">Play it locally, online or against AI</a></p>
     <p class="story">A chess variant where you can respond to a move before it happens. Every move goes on a stack. Your opponent sees it coming and can answer with a move of their own, you can answer that, and so on. The stack resolves in reverse order: the last response first, the original move last. Any illegal move simply fizzles.</p>
     <p class="story">A few interesting consequences emerge: You can move into check, and kings can stand next to each other. It all works and it's a lot of fun to play.</p>
-    <p class="story">Getting there took some design decisions. At first, a threatened piece could keep dodging with a new response each time, so catching it took one attacker per escape square. Limiting each piece to one move on the stack at a time made threats real again. I also removed the check rules entirely: they didn't fit a game where a king can be saved by a response, and the game got both simpler and better without them.</p>
-    <p class="story">I built it with AI coding agents, including online play with no sign-in and an alpha-beta AI opponent.</p>
   </section>
 
   <section class="videos">
     <img src="../images/stack-chess/stack-chain.png" alt="Stack-Chess board with a chain of eight responses on the stack">
     <img src="../images/stack-chess/stack-panel.png" alt="Stack-Chess with four moves on the stack, waiting to resolve">
+  </section>
+
+  <section class="content">
+    <p class="story">Some design decisions. As often in chess variants, you win by capturing the king. Limiting each piece to one move on the stack at a time made pieces easier to capture and removed infinite loops/stalemates. I also removed the check rules entirely: they didn't fit a game where a king can dodge an attack in response, and the game got both simpler and better without them.</p>
+    <p class="story">Built with pure html javaScript + css using claude code, including online play with no sign-in and a simple min-max AI opponent.</p>
   </section>
 
 
