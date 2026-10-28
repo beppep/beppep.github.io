@@ -93,6 +93,7 @@
   <section class="content">
     <p class="story">Some design decisions. As often in chess variants, you win by capturing the king. Limiting each piece to one move on the stack at a time made pieces easier to capture and removed infinite loops/stalemates. I also removed the check rules entirely: they didn't fit a game where a king can dodge an attack in response, and the game got both simpler and better without them.</p>
     <p class="story">Built with pure html javaScript + css using claude code, including online play with no sign-in and a simple min-max AI opponent.</p>
+    <p class="story">Playing against the AI, I noticed it making mistakes and tracked down why. One was a bug in the pruning, where moves that were cut from the search could still get picked. Another was the evaluation: it counted an attacked piece as lost, even though in Stack-Chess the piece can often just dodge in response, so I changed it to allow that. Chess engines usually keep searching captures at the end of a line, so that they don't stop in the middle of a trade. I adapted that idea to the stack: responses to moves already on the stack don't count toward the search depth.</p>
   </section>
 
 
