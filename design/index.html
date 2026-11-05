@@ -36,7 +36,7 @@
     <li><b>Top grades</b><span>Pass with distinction in every course of my MSc in Mathematics at Lund University</span></li>
     <li><b>Finalist</b><span>Skolornas Matematiktävling, the Swedish national math competition</span></li>
     <li><b>Nominee</b><span>Best Mobile Game at the Swedish Game Awards, for Growth Spurt</span></li>
-    <li><b>7 games</b><span>built as templates for the engine in a few months at Summer Engine</span></li>
+    <li><b>5 games</b><span>built as engine templates at Summer Engine, next to the agent tools</span></li>
     <li><b>100+</b><span>players subscribed to Grasshopper, my Slay the Spire 2 character</span></li>
   </ul>
 </section>
@@ -46,15 +46,15 @@
   <div class="pillars">
     <article>
       <h3>Game design</h3>
-      <p>Mechanics, systems, balance and levels. I approach a design as one big optimization problem: every goal in view at once, and no effort spent on anything that doesn't matter.</p>
+      <p>Mechanics, systems, balance and levels. I treat a design as one big optimization problem: every goal in view at once, no effort on what doesn't matter.</p>
     </article>
     <article>
       <h3>Building with AI</h3>
-      <p>I orchestrate coding agents to ship real, tested work at startup speed: seven game templates, a 3D rigging pipeline, and an online multiplayer server for a game I invented.</p>
+      <p>I orchestrate coding agents to ship real, tested work at startup speed: game templates, agent tools, a 3D rigging pipeline, and an online server for a game I invented.</p>
     </article>
     <article>
       <h3>Problem solving</h3>
-      <p>Competition math and research in group theory trained me to dig until I understand what is really going on, and then fix the cause instead of the symptom.</p>
+      <p>Competition math and group theory research trained me to dig until I understand what is really going on, then fix the cause, not the symptom.</p>
     </article>
   </div>
 </section>
@@ -62,116 +62,58 @@
 <section class="wrap">
   <h2 class="section-title">Selected work</h2>
 
-  <article class="project">
-    <div class="project-head">
-      <p class="num">01</p>
-      <div>
-        <h3>Summer Engine</h3>
-        <p class="role">Software Developer · June – September 2026 · Y Combinator startup</p>
-        <p class="links"><a href="https://summerengine.com/" target="_blank">summerengine.com</a></p>
-      </div>
-    </div>
-    <div class="project-body">
+  <article class="project wide">
+    <div class="text">
+      <h3>Summer Engine</h3>
+      <p class="role">Software Developer · June – September 2026 · Y Combinator startup · <a href="https://summerengine.com/" target="_blank">summerengine.com</a></p>
       <p>An AI-native game engine, a fork of Godot, where agents build games from chat. I worked on the agent side: the skills, tools and harness the agents use, and the games they make.</p>
       <ul class="results">
-        <li><strong>Built 7 game templates</strong> in many genres and shipped them to summerengine.com.</li>
-        <li><strong>Orchestrated frontier coding agents</strong> (Claude Code, Codex, parallel subagents) for audits, fixes and research across the engine, the web app and the games.</li>
-        <li><strong>Led a five-agent audit</strong> of the 24,000-line skills library, and tested it with small, fresh models building games in the live engine.</li>
-        <li><strong>Text prompt to a rigged, animated 3D model.</strong> Fixed skin-weight bugs in the auto-rigging pipeline and cut mean joint error from 1.6&nbsp;cm to 0.5&nbsp;cm.</li>
+        <li><strong>Built 5 game templates</strong> in different genres and shipped them to summerengine.com.</li>
+        <li><strong>Wrote and tested skills</strong> for the in-engine agents, and led a five-agent audit of the 24,000-line skills library.</li>
+        <li><strong>Orchestrated frontier coding agents</strong> (Claude Code, Codex, parallel subagents) across the engine, the web app and the games.</li>
+        <li><strong>Text prompt to a rigged, animated 3D model.</strong> Fixed bugs in the auto-rigging pipeline and cut its joint error by more than two thirds.</li>
       </ul>
     </div>
   </article>
 
   <article class="project">
-    <div class="project-head">
-      <p class="num">02</p>
-      <div>
-        <h3>Stack-Chess</h3>
-        <p class="role">Inventor, designer and developer</p>
-        <p class="links"><a class="btn primary small" href="https://beppep.github.io/stack-chess/" target="_blank">Play it now: locally, online or against the AI</a></p>
-      </div>
-    </div>
-    <div class="media">
-      <img src="../images/stack-chess/stack-chain.png" alt="Stack-Chess board with a chain of eight responses on the stack" loading="lazy">
-      <img src="../images/stack-chess/stack-panel.png" alt="Stack-Chess with four moves on the stack, waiting to resolve" loading="lazy">
-    </div>
-    <div class="project-body cols">
-      <div>
-        <h4>The game</h4>
-        <p>A chess variant where you can respond to a move before it happens. Every move goes on a stack. Your opponent sees it coming and can answer with a move of their own, you can answer that, and so on. The stack resolves in reverse order: the last response first, the original move last. Any illegal move simply fizzles.</p>
-        <p>A few interesting consequences emerge: you can move into check, and kings can stand next to each other. It all works, and it's a lot of fun to play.</p>
-        <h4>Design decisions</h4>
-        <p>As often in chess variants, you win by capturing the king. Limiting each piece to one move on the stack at a time made pieces easier to capture and removed infinite loops and stalemates. I also removed the check rules entirely: they didn't fit a game where a king can dodge an attack in response, and the game got both simpler and better without them.</p>
-      </div>
-      <div>
-        <h4>The build</h4>
-        <p>Plain HTML, JavaScript and CSS, built with Claude Code. Online play with no sign-in, game clocks, replays, and a minimax AI opponent.</p>
-        <h4>Debugging the AI</h4>
-        <p>Playing against the AI, I noticed it making mistakes and tracked down why. One was a bug in the pruning, where moves that were cut from the search could still get picked. Another was the evaluation: it counted an attacked piece as lost, even though in Stack-Chess the piece can often just dodge in response, so I changed it to allow that.</p>
-        <p>Chess engines usually keep searching captures at the end of a line, so that they don't stop in the middle of a trade. I adapted that idea to the stack: responses to moves already on the stack don't count toward the search depth.</p>
-      </div>
+    <img class="media" src="../images/stack-chess/stack-chain.png" alt="Stack-Chess board with a chain of responses on the stack" loading="lazy">
+    <div class="text">
+      <h3>Stack-Chess</h3>
+      <p class="role">Inventor, designer and developer</p>
+      <p>A chess variant I invented. Every move goes on a stack, and your opponent can respond before it happens. Responses resolve last-in-first-out, so you can dodge an attack, or counter a counter.</p>
+      <p>Built with Claude Code: online play with no sign-in, game clocks, replays and an AI opponent.</p>
+      <p><a class="btn primary small" href="https://beppep.github.io/stack-chess/" target="_blank">Play it now</a></p>
     </div>
   </article>
 
   <article class="project">
-    <div class="project-head">
-      <p class="num">03</p>
-      <div>
-        <h3>Grasshopper</h3>
-        <p class="role">Designer and developer · Slay the Spire 2 character mod · 100+ subscribers</p>
-        <p class="links"><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3811766464" target="_blank">Steam Workshop</a></p>
-      </div>
-    </div>
-    <div class="media">
-      <img src="../images/grasshopper/cover.png" alt="The Thieving Hopper cover art" loading="lazy">
-      <img src="../images/grasshopper/gameplay.png" alt="The Thieving Hopper gameplay" loading="lazy">
-    </div>
-    <div class="project-body cols">
-      <div>
-        <p>A full new character: three new mechanics (holding a card to play later, frenzy and flying) and six build-arounds. Over 90 cards, plus relics, potions and dialogue with every Ancient. Made in C# with Harmony patches on the decompiled game.</p>
-      </div>
-      <div>
-        <p>I optimized for many things at once:</p>
-        <ul class="goals">
-          <li><strong>Novel mechanics.</strong> A set of unique mechanics that the game has not seen before.</li>
-          <li><strong>Pop-off potential.</strong> Every synergy space should be able to take over a run when it comes together.</li>
-          <li><strong>Interweaving.</strong> Cards that bridge the synergy spaces, so you can combine them in one deck.</li>
-          <li><strong>Balance.</strong> No single combo should be over-centralizing.</li>
-          <li><strong>Thematic coherence.</strong> Every card should feel like something this character would do.</li>
-          <li><strong>Simplicity.</strong> Each card should be quick to read and light on mental load.</li>
-        </ul>
-      </div>
+    <img class="media" src="../images/grasshopper/gameplay.png" alt="The Grasshopper in a Slay the Spire 2 fight" loading="lazy">
+    <div class="text">
+      <h3>Grasshopper</h3>
+      <p class="role">Slay the Spire 2 character mod · 100+ subscribers · <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3811766464" target="_blank">Steam Workshop</a></p>
+      <p>A full new character: three new mechanics, six build-arounds and over 90 cards, plus relics, potions and dialogue. C# with Harmony patches on the decompiled game.</p>
+      <p>Designed for six goals at once: novel mechanics, pop-off potential, synergies that interweave, balance, a coherent theme, and cards that are quick to read.</p>
     </div>
   </article>
 
   <article class="project">
-    <div class="project-head">
-      <p class="num">04</p>
-      <div>
-        <h3>Growth Spurt</h3>
-        <p class="role">Game and level designer · Nominated for Best Mobile Game, Swedish Game Awards · 4.9 stars on Google Play</p>
-        <p class="links"><a href="https://play.google.com/store/apps/details?id=com.GrowthTeam.GrowthSpurt" target="_blank">Google Play</a> <a href="https://apps.apple.com/us/app/growth-spurt/id6479301221" target="_blank">App Store</a> <a href="https://wingitgames.com/" target="_blank">Website</a></p>
-      </div>
-    </div>
-    <div class="media">
-      <iframe src="https://www.youtube.com/embed/GpjZCXkJbrs" title="Growth Spurt video" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-      <iframe src="https://www.youtube.com/embed/Z1g0rFLS4sA" title="Growth Spurt video 2" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    </div>
-    <div class="project-body cols">
-      <p>Growth Spurt started as an idea I made with some friends at a game jam. We liked it enough to keep going, and designed the full game together, all the way to release on both app stores.</p>
-      <p>As level designer, I built around 60 levels. We secretly control exactly which cards the player is given throughout the level. That way the levels teach the different parts of the game one step at a time, while still feeling like a real challenge.</p>
+    <iframe class="media" src="https://www.youtube.com/embed/GpjZCXkJbrs" title="Growth Spurt trailer" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <div class="text">
+      <h3>Growth Spurt</h3>
+      <p class="role">Game and level designer · Nominated for Best Mobile Game, Swedish Game Awards · 4.9 stars</p>
+      <p>A game-jam idea that we took all the way to release. I built around 60 levels. We secretly control which cards the player gets, so each level teaches one new thing while still feeling like a real challenge.</p>
+      <p class="links"><a href="https://play.google.com/store/apps/details?id=com.GrowthTeam.GrowthSpurt" target="_blank">Google Play</a> <a href="https://apps.apple.com/us/app/growth-spurt/id6479301221" target="_blank">App Store</a> <a href="https://wingitgames.com/" target="_blank">Website</a></p>
     </div>
   </article>
 </section>
 
 <section class="wrap more">
-  <h2 class="section-title">More games</h2>
-  <p>A daily deduction puzzle, a combo-heavy platform fighter, a roguelike about dancing, a house-building game judged by critics, and more. See them all at <a href="https://beppep.github.io/">beppep.github.io</a>.</p>
+  <p>More games, from a daily deduction puzzle to a combo-heavy platform fighter, at <a href="https://beppep.github.io/">beppep.github.io</a>.</p>
 </section>
 
 <footer class="wrap closing">
   <h2>Let's build something.</h2>
-  <p>I'm looking for a team where I can design and build games. Send me a line and I'll show you what I can do.</p>
   <div class="cta">
     <a class="btn primary" href="mailto:bror.beppe.persson@gmail.com">bror.beppe.persson@gmail.com</a>
     <a class="btn" href="Bror_Persson_CV.pdf" target="_blank">CV (PDF)</a>
